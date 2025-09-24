@@ -16,8 +16,12 @@ Super-simple docker container setup for running Qwen3-Omni models (Instruct, Thi
    ```
 
 2. **Build the Docker image** (defaults to instruct):
+
+  Please note: The size of the base image is substantial due to a full CUDA toolkit installation. Ensure you have sufficient disk space - all layers take ~16GiB.
+  A fresh build (without cache) may take 15-30 minutes depending on your internet speed and system performance.
+
    ```bash
-   make build
+   sudo make build
    # or specify variant: make build MODEL_VARIANT=thinking
    ```
 

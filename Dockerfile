@@ -4,9 +4,6 @@ FROM aimehub/pytorch-2.8.0-aime-cuda12.8.1
 ARG MODEL_VARIANT=instruct
 ARG MODEL_REPO=Qwen/Qwen3-Omni-30B-A3B-Instruct
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential python3-dev curl && rm -rf /var/lib/apt/lists/*
-
 # vLLM for Qwen3 Omni
 RUN git clone -b qwen3_omni https://github.com/wangxiongts/vllm.git /opt/vllm
 WORKDIR /opt/vllm
