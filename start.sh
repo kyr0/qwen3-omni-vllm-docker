@@ -120,7 +120,6 @@ RUN_ARGS+=(
   "--kv-cache-dtype" "fp8_e5m2" # H200 optimization - remove if not using this memory type
   "--enforce-eager" # Operations are executed immediately as they're called (like regular PyTorch) - use this when memory efficiency concern > speed concern
   "-tp" "1" # tensor parallelism (set to number of GPUs if using multi-GPU)
-  "--rope-scaling" "{\"type\":\"${ROPE_SCALING_TYPE}\",\"factor\":${ROPE_SCALING_FACTOR}}" # adjust for longer context if needed
 )
 
 # Execute docker run
