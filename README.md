@@ -111,6 +111,84 @@ Example output:
    # or specify variant: make test-api MODEL_VARIANT=thinking
    ```
 
+## Model Variant Usage
+
+### Method 1: Make with Arguments (Recommended)
+```bash
+# Build specific variant
+make build thinking
+```
+
+### Method 2: Direct Script Arguments
+```bash
+make setup  # make scripts executable
+
+# Use scripts with arguments
+./build.sh thinking
+```
+### Method 3: Environment Variable
+```bash
+# Set variant for all subsequent commands
+export MODEL_VARIANT=thinking
+make build
+```
+
+## Make Commands
+
+- `make help` - Show all available commands and examples
+- `make setup` - Make scripts executable
+- `make build [MODEL_VARIANT=x]` - Build Docker image for variant
+- `make download [MODEL_VARIANT=x]` - Download model files
+- `make start [MODEL_VARIANT=x]` - Start container
+- `make stop [MODEL_VARIANT=x]` - Stop container
+- `make status [MODEL_VARIANT=x]` - Check container status
+- `make clean [MODEL_VARIANT=x]` - Remove container and image for variant
+- `make clean-all` - Remove all containers and images
+- `make test-api [MODEL_VARIANT=x]` - Test vLLM and Model (e2e test using cURL)
+- `make logs [MODEL_VARIANT=x]` - View container logs
+- `make logs-follow [MODEL_VARIANT=x]` - Follow container logs
+
+## Script Help
+
+All scripts support help with `-h` or `--help`:
+
+```bash
+./build.sh --h
+./start.sh -h
+./stop.sh --h
+./status.sh -h
+./download.sh -h
+./test-api.sh --h
+./logs.sh -h (--follow for tailing logs)
+```
+
+## Configuration
+
+The configuration is automatically managed via `config.sh` based on the model variant:
+
+- **Container names**: `qwen3-omni-30b-a3b-{variant}` (e.g., `qwen3-omni-30b-a3b-thinking`)
+- **Image tags**: `qwen3-omni-vllm:{variant}` (e.g., `qwen3-omni-vllm:captioner`)
+- **Model repositories**: `Qwen/Qwen3-Omni-30B-A3B-{Variant}` (e.g., `Qwen/Qwen3-Omni-30B-A3B-Thinking`)
+- **Network aliases**: Include variant for isolation
+- **Port**: All variants use port 8901 (only one can run at a time)
+
+## Requirements
+
+- Docker with GPU support
+- NVIDIA drivers
+- At least 60GB RAM (for 30B model)
+- CUDA-compatible GPU with sufficient VRAM
+- Make (for convenience commands)
+
+## API Access
+
+Once running, the API is available at:
+- **Base URL**: `http://localhost:8901`
+- **Health Check**: `http://localhost:8901/health`
+- **OpenAI-compatible**: `http://localhost:8901/v1/chat/completions`
+
+## Testing API Outputs
+
 Example output:
 
 ```bash
@@ -173,91 +251,6 @@ The image is a cartoon titled "CHOOSE YOUR ISLAND WISELY" that visually represen
 === Test Summary ===
 ✅ All tests passed! 🎉
 ```
-
-## Model Variant Usage
-
-### Method 1: Make with Arguments (Recommended)
-```bash
-# Build specific variant
-make build MODEL_VARIANT=thinking
-make start MODEL_VARIANT=thinking
-make status MODEL_VARIANT=thinking
-
-# Build all variants
-make build-all
-```
-
-### Method 2: Direct Script Arguments
-```bash
-# Make executable first
-chmod +x *.sh
-
-# Use scripts with arguments
-./build.sh thinking
-./start.sh thinking
-./status.sh thinking
-./stop.sh thinking
-./api-test.sh thinking
-```
-
-### Method 3: Environment Variable
-```bash
-# Set variant for all subsequent commands
-export MODEL_VARIANT=captioner
-make build
-make start
-make status
-```
-
-## Make Commands
-
-- `make help` - Show all available commands and examples
-- `make setup` - Make scripts executable
-- `make build [MODEL_VARIANT=x]` - Build Docker image for variant
-- `make build-all` - Build all model variants (instruct, thinking, captioner)
-- `make download [MODEL_VARIANT=x]` - Download model files
-- `make start [MODEL_VARIANT=x]` - Start container
-- `make stop [MODEL_VARIANT=x]` - Stop container
-- `make status [MODEL_VARIANT=x]` - Check container status
-- `make clean [MODEL_VARIANT=x]` - Remove container and image for variant
-- `make clean-all` - Remove all containers and images
-
-## Script Help
-
-All scripts support help with `-h` or `--help`:
-
-```bash
-./build.sh --h
-./start.sh -h
-./stop.sh --h
-./status.sh -h
-./download.sh -h
-```
-
-## Configuration
-
-The configuration is automatically managed via `config.sh` based on the model variant:
-
-- **Container names**: `qwen3-omni-30b-a3b-{variant}` (e.g., `qwen3-omni-30b-a3b-thinking`)
-- **Image tags**: `qwen3-omni-vllm:{variant}` (e.g., `qwen3-omni-vllm:captioner`)
-- **Model repositories**: `Qwen/Qwen3-Omni-30B-A3B-{Variant}` (e.g., `Qwen/Qwen3-Omni-30B-A3B-Thinking`)
-- **Network aliases**: Include variant for isolation
-- **Port**: All variants use port 8901 (only one can run at a time)
-
-## Requirements
-
-- Docker with GPU support
-- NVIDIA drivers
-- At least 60GB RAM (for 30B model)
-- CUDA-compatible GPU with sufficient VRAM
-- Make (for convenience commands)
-
-## API Access
-
-Once running, the API is available at:
-- **Base URL**: `http://localhost:8901`
-- **Health Check**: `http://localhost:8901/health`
-- **OpenAI-compatible**: `http://localhost:8901/v1/chat/completions`
 
 ## Environment Variables
 

@@ -7,7 +7,6 @@ help:
 	@echo "Available commands:"
 	@echo "  make setup                    - Make scripts executable"
 	@echo "  make build [MODEL_VARIANT=x]  - Build Docker image"
-	@echo "  make build-all                - Build all model variants"
 	@echo "  make download [MODEL_VARIANT=x] - Download model files"
 	@echo "  make start [MODEL_VARIANT=x]  - Start container"
 	@echo "  make stop [MODEL_VARIANT=x]   - Stop container"
@@ -15,6 +14,8 @@ help:
 	@echo "  make clean [MODEL_VARIANT=x]  - Remove container and image"
 	@echo "  make clean-all                - Remove all variants"
 	@echo "  make test-api [MODEL_VARIANT=x] - Test vLLM and Model (e2e test using cURL)"
+	@echo "  make logs [MODEL_VARIANT=x]   - View container logs"
+	@echo "  make logs-follow [MODEL_VARIANT=x] - Follow container logs"
 	@echo ""
 	@echo "Model variants:"
 	@echo "  instruct   -> Qwen3-Omni-30B-A3B-Instruct (default)"
@@ -33,11 +34,6 @@ setup:
 
 build:
 	./build.sh $(MODEL_VARIANT)
-
-build-all:
-	./build.sh instruct
-	./build.sh thinking
-	./build.sh captioner
 
 download:
 	./download.sh $(MODEL_VARIANT)
