@@ -2,6 +2,8 @@
 
 Super-simple docker container setup for running Qwen3-Omni models (Instruct, Thinking, Captioner) using a custom version of vLLM with Qwen patches and flash attention.
 
+NOTE: This has tiny optimizations for H200. Just fork this repo, clone, and modify the `./start.sh` script to add/modify/remove vLLM args as needed.
+
 ## Supported Models
 
 - **instruct** (default): `Qwen/Qwen3-Omni-30B-A3B-Instruct`
@@ -105,8 +107,8 @@ Example output:
 
 7. **Test vLLM and Model (e2e test using cURL)**:
    ```bash
-   make api-test
-   # or specify variant: make api-test MODEL_VARIANT=thinking
+   make test-api
+   # or specify variant: make test-api MODEL_VARIANT=thinking
    ```
 
 Example output:

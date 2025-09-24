@@ -31,8 +31,6 @@ echo "=============================="
 # Build the image with build arguments
 echo "Building Docker image..."
 docker build --progress=plain \
-  --build-arg MODEL_VARIANT="$MODEL_VARIANT" \
-  --build-arg MODEL_REPO="$MODEL_REPO" \
   -t "$IMAGE" .
 
 echo "Image '$IMAGE' built successfully!"

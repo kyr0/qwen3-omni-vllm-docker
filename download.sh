@@ -99,7 +99,11 @@ fi
 
 # -------- Download --------
 echo "Starting download (resumable)..."
-hf download "${DL_ARGS[@]}"
+if ! hf download "${DL_ARGS[@]}"; then
+  echo "Error: Download failed. Check your network connection and token permissions."
+  deactivate
+  exit 1
+fi
 
 echo "Done."
 echo "Cached files live under: $EFFECTIVE_CACHE_DIR"

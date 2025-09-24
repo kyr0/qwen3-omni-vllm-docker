@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.sh" "${1:-}"
 
 # Configuration
-API_BASE="http://localhost:${PORT}"
+API_BASE="http://localhost:${QWEN_PORT}"
 TIMEOUT=30
 
 # Colors for output

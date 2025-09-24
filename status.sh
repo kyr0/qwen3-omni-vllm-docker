@@ -25,7 +25,7 @@ source "$SCRIPT_DIR/config.sh" "${1:-}"
 echo "=== Docker Container Status ==="
 echo "  Container name: $NAME"
 echo "  Expected image: $IMAGE"
-echo "  Expected port:  $PORT"
+echo "  Expected port:  $QWEN_PORT"
 echo "  Model variant:  $MODEL_VARIANT"
 echo "  Model repo:     $MODEL_REPO"
 echo "==============================="
@@ -63,8 +63,8 @@ case "$CONTAINER_STATUS" in
     echo "  Port map:   $PORTS"
     echo ""
     echo "🌐 API Access:"
-    echo "  Endpoint:   http://localhost:$PORT"
-    echo "  Health:     http://localhost:$PORT/health"
+    echo "  Endpoint:   http://localhost:$QWEN_PORT"
+    echo "  Health:     http://localhost:$QWEN_PORT/health"
     echo ""
     echo "📊 Quick Actions:"
     echo "  View logs:  docker logs -f $NAME"
@@ -100,10 +100,10 @@ if [[ "$CONTAINER_STATUS" == "running" ]]; then
   echo ""
   echo "🔍 Connectivity Test:"
   if command -v curl >/dev/null 2>&1; then
-    if curl -s --connect-timeout 3 "http://localhost:$PORT/health" >/dev/null 2>&1; then
-      echo "  ✅ API is responding on port $PORT"
+    if curl -s --connect-timeout 3 "http://localhost:$QWEN_PORT/health" >/dev/null 2>&1; then
+      echo "  ✅ API is responding on port $QWEN_PORT"
     else
-      echo "  ⚠️  API not responding on port $PORT (may still be starting up)"
+      echo "  ⚠️  API not responding on port $QWEN_PORT (may still be starting up)"
     fi
   else
     echo "  ℹ️  Install curl to test API connectivity"
@@ -114,11 +114,15 @@ fi
 if [[ "$CONTAINER_STATUS" == "running" ]]; then
   echo ""
   echo "📈 Resource Usage:"
-  STATS=$(docker stats "$NAME" --no-stream --format "table {{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null | tail -n 1 || echo "N/A	N/A")
-  CPU_USAGE=$(echo "$STATS" | cut -f1)
-  MEM_USAGE=$(echo "$STATS" | cut -f2)
-  echo "  CPU:        ${CPU_USAGE:-N/A}"
-  echo "  Memory:     ${MEM_USAGE:-N/A}"
+  if STATS=$(docker stats "$NAME" --no-stream --format "table {{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null | tail -n 1); then
+    CPU_USAGE=$(echo "$STATS" | cut -f1)
+    MEM_USAGE=$(echo "$STATS" | cut -f2)
+    echo "  CPU:        ${CPU_USAGE:-N/A}"
+    echo "  Memory:     ${MEM_USAGE:-N/A}"
+  else
+    echo "  CPU:        N/A (stats unavailable)"
+    echo "  Memory:     N/A (stats unavailable)"
+  fi
 fi
 
 echo ""

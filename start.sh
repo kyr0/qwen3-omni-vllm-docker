@@ -28,10 +28,12 @@ echo "  Container name:    $NAME"
 echo "  Docker image:      $IMAGE"
 echo "  Model variant:     $MODEL_VARIANT"
 echo "  Model repo:        $MODEL_REPO"
+echo "  Max model length:  $MAX_MODEL_LEN"
+echo "  VRAM memory usage: $GPU_MEMORY_UTILIZATION"
 echo "  Network:           $NET"
 echo "  Network alias:     $ALIAS"
-echo "  Port mapping:      ${PORT}:8901"
-echo "  GPU device:        0"
+echo "  Port mapping:      ${QWEN_PORT}:8901"
+echo "  GPU device:        $GPU_DEVICE"
 echo "  HF_HOME:           ${HF_HOME:-<not set>}"
 echo "====================================="
 
@@ -61,7 +63,13 @@ if ! docker network inspect "$NET" >/dev/null 2>&1; then
     n|N) echo "Aborted."; exit 1 ;;
     *) 
       echo "Creating Docker network '$NET'..."
-      docker network create "$NET"
+      if ! docker network create "$NET" 2>/dev/null; then
+        # Network might have been created by another process
+        if ! docker network inspect "$NET" >/dev/null 2>&1; then
+          echo "Error: Failed to create network '$NET'"
+          exit 1
+        fi
+      fi
       ;;
   esac
 fi
@@ -86,12 +94,12 @@ echo "Starting container '$NAME'..."
 # Build docker run command
 RUN_ARGS=(
   "run" "-d" "--name" "$NAME"
-  "--gpus" "device=0"
+  "--gpus" "$GPU_DEVICE"
   "--network" "$NET" "--network-alias" "$ALIAS"
-  "-p" "${PORT}:8901"
+  "-p" "${QWEN_PORT}:8901"
   "--ipc=host"
   "--ulimit" "memlock=-1" "--ulimit" "stack=67108864"
-  "-e" "MODEL_REPO=$MODEL_REPO"
+  "--restart" "unless-stopped"
 )
 
 # Add volume mount only if HF_HOME is set
@@ -101,12 +109,25 @@ fi
 
 RUN_ARGS+=("$IMAGE")
 
+# Add vLLM arguments after the image name (these go to the vLLM command)
+RUN_ARGS+=(
+  "$MODEL_REPO"
+  "--dtype" "bfloat16" # ONLY change if you use a different precision finetune/quantization
+  "--port" "8901" # do not changeM; if host port binding should change, change the -p argument above
+  "--host" "0.0.0.0" # do not change; container must listen on all interfaces
+  "--max-model-len" "$MAX_MODEL_LEN" # max sequence length - adjust as needed, adds 2 to VRAM usage
+  "--gpu-memory-utilization" "$GPU_MEMORY_UTILIZATION" # factor of VRAM to use (0.90 = 90%) - adjust as needed
+  "--kv-cache-dtype" "fp8_e5m2" # H200 optimization - remove if not using this memory type
+  "--enforce-eager" # Operations are executed immediately as they're called (like regular PyTorch) - use this when memory efficiency concern > speed concern
+  "-tp" "1" # tensor parallelism (set to number of GPUs if using multi-GPU)
+)
+
 # Execute docker run
 docker "${RUN_ARGS[@]}"
 
 echo "Container '$NAME' started successfully!"
 echo "Model variant: $MODEL_VARIANT ($MODEL_REPO)"
-echo "API endpoint: http://localhost:${PORT}"
+echo "API endpoint: http://localhost:$QWEN_PORT/v1/chat/completions"
 echo ""
 echo "To check logs: docker logs -f $NAME"
 echo "To stop:       ./stop.sh $MODEL_VARIANT"

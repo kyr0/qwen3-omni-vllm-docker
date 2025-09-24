@@ -14,7 +14,7 @@ help:
 	@echo "  make status [MODEL_VARIANT=x] - Check container status"
 	@echo "  make clean [MODEL_VARIANT=x]  - Remove container and image"
 	@echo "  make clean-all                - Remove all variants"
-	@echo "  make api-test [MODEL_VARIANT=x] - Test vLLM and Model (e2e test using cURL)"
+	@echo "  make test-api [MODEL_VARIANT=x] - Test vLLM and Model (e2e test using cURL)"
 	@echo ""
 	@echo "Model variants:"
 	@echo "  instruct   -> Qwen3-Omni-30B-A3B-Instruct (default)"
@@ -63,5 +63,5 @@ clean-all:
 	docker rmi qwen3-omni-vllm:thinking || true
 	docker rmi qwen3-omni-vllm:captioner || true
 
-api-test:
-	./api-test.sh $(MODEL_VARIANT)
+test-api:
+	./test-api.sh $(MODEL_VARIANT)
