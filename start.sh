@@ -121,7 +121,6 @@ RUN_ARGS+=(
   "--enforce-eager" # Operations are executed immediately as they're called (like regular PyTorch) - use this when memory efficiency concern > speed concern
   "-tp" "1" # tensor parallelism (set to number of GPUs if using multi-GPU)
   "--rope-scaling" "{\"type\":\"${ROPE_SCALING_TYPE}\",\"factor\":${ROPE_SCALING_FACTOR}}" # adjust for longer context if needed
-  "--num-workers" "8" # increase if you have many CPU cores and want to speed up preprocessing (not usually needed)
 )
 
 # Execute docker run
