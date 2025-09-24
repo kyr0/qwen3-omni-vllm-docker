@@ -137,7 +137,6 @@ Example output:
 ### 1. **Lyrics Analysis**
 The main part of your message seems to be a set of lyrics, possibly from a song. Here's a cleaned-up version:
 
-```
 I wonder why
 Live a lie
 Walk along, along, oh baby
