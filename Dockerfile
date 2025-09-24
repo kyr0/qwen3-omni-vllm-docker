@@ -7,13 +7,13 @@ ARG MODEL_REPO=Qwen/Qwen3-Omni-30B-A3B-Instruct
 # vLLM for Qwen3 Omni
 RUN git clone -b qwen3_omni https://github.com/wangxiongts/vllm.git /opt/vllm
 WORKDIR /opt/vllm
-RUN pip install -r requirements/build.txt && \
-    pip install -r requirements/cuda.txt && \
+RUN pip install --break-system-packages -r requirements/build.txt && \
+    pip install --break-system-packages -r requirements/cuda.txt && \
     export VLLM_PRECOMPILED_WHEEL_LOCATION="https://wheels.vllm.ai/a5dd03c1ebc5e4f56f3c9d3dc0436e9c582c978f/vllm-0.9.2-cp38-abi3-manylinux1_x86_64.whl" && \
-    VLLM_USE_PRECOMPILED=1 pip install -e . -v --no-build-isolation || pip install -e . -v
+    VLLM_USE_PRECOMPILED=1 pip install --break-system-packages -e . -v --no-build-isolation || pip install --break-system-packages -e . -v
 
 # Extras
-RUN pip install "git+https://github.com/huggingface/transformers" \
+RUN pip install --break-system-packages "git+https://github.com/huggingface/transformers" \
     accelerate qwen-omni-utils -U \
     "flash-attn>=2.6.0" --no-build-isolation
 
