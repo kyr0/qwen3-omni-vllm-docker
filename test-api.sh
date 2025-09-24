@@ -105,7 +105,7 @@ test_text() {
       "messages": [
         {"role": "user", "content": "Hello! Please respond with a short greeting."}
       ],
-      "max_tokens": 50,
+      "max_tokens": 500,
       "temperature": 0.1
     }' \
     "$API_BASE/v1/chat/completions" 2>/dev/null)
@@ -137,7 +137,7 @@ test_audio() {
           {"type": "audio_url", "audio_url": {"url": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-Omni/cookbook/caption2.mp3"}}
         ]}
       ],
-      "max_tokens": 100,
+      "max_tokens": 500,
       "temperature": 0.1
     }' \
     "$API_BASE/v1/chat/completions" 2>/dev/null)
@@ -170,7 +170,7 @@ test_image() {
           {"type": "text", "text": "What do you see in this image?"}
         ]}
       ],
-      "max_tokens": 100,
+      "max_tokens": 500,
       "temperature": 0.1
     }' \
     "$API_BASE/v1/chat/completions" 2>/dev/null)
@@ -204,7 +204,7 @@ test_multimodal() {
           {"type": "text", "text": "Please describe what you hear and see:"}
         ]}
       ],
-      "max_tokens": 150,
+      "max_tokens": 500,
       "temperature": 0.1
     }' \
     "$API_BASE/v1/chat/completions" 2>/dev/null)
