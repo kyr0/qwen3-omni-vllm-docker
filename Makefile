@@ -65,3 +65,9 @@ clean-all:
 
 test-api:
 	./test-api.sh $(MODEL_VARIANT)
+
+logs:
+	./logs.sh $(MODEL_VARIANT)
+
+logs-follow:
+	./logs.sh $(MODEL_VARIANT) --follow
