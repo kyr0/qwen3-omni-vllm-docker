@@ -110,6 +110,7 @@ fi
 RUN_ARGS+=("$IMAGE")
 
 # Add vLLM arguments after the image name (these go to the vLLM command)
+# https://docs.vllm.ai/en/v0.5.3/models/engine_args.html#engine-arguments
 RUN_ARGS+=(
   "$MODEL_REPO"
   "--dtype" "bfloat16" # ONLY change if you use a different precision finetune/quantization
@@ -117,9 +118,10 @@ RUN_ARGS+=(
   "--host" "0.0.0.0" # do not change; container must listen on all interfaces
   "--max-model-len" "$MAX_MODEL_LEN" # max sequence length - adjust as needed, adds 2 to VRAM usage
   "--gpu-memory-utilization" "$GPU_MEMORY_UTILIZATION" # factor of VRAM to use (0.90 = 90%) - adjust as needed
-  "--kv-cache-dtype" "fp8_e5m2" # H200 optimization - remove if not using this memory type
   "--enforce-eager" # Operations are executed immediately as they're called (like regular PyTorch) - use this when memory efficiency concern > speed concern
   "-tp" "1" # tensor parallelism (set to number of GPUs if using multi-GPU)
+  "--seed" "42" # for reproducibility, if using sampling
+  "--rope-scaling" "{\"type\":\"${ROPE_SCALING_TYPE}\",\"factor\":${ROPE_SCALING_FACTOR}}" # adjust for longer context if needed
 )
 
 # Execute docker run
