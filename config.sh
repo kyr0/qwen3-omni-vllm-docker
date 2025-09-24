@@ -42,6 +42,6 @@ export ALIAS="qwen3-omni-30b-a3b-${MODEL_VARIANT}"
 # Model configuration
 export MODEL_REPO="Qwen/Qwen3-Omni-30B-A3B-${MODEL_SUFFIX}"
 export MODEL_SUFFIX
-export MAX_MODEL_LEN=65536
-export GPU_MEMORY_UTILIZATION=0.90
-export GPU_DEVICE="all"
+export MAX_MODEL_LEN=131072  # Max model context length (128k)
+export GPU_MEMORY_UTILIZATION=0.7  # Fraction of GPU memory to utilize
+export GPU_DEVICE="all" # Use all available GPUs
