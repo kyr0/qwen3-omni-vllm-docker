@@ -21,6 +21,9 @@ ENV HF_HOME=/models \
     TRANSFORMERS_CACHE=/models \
     HUGGINGFACE_HUB_CACHE=/models
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8901/health || exit 1
+
 EXPOSE 8901
 
 # Default CMD is your raw vLLM serve
