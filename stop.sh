@@ -1,13 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Load shared configuration
+# Usage information
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: $0 [MODEL_VARIANT]"
+  echo ""
+  echo "MODEL_VARIANT can be:"
+  echo "  instruct   - Qwen3-Omni-30B-A3B-Instruct (default)"
+  echo "  thinking   - Qwen3-Omni-30B-A3B-Thinking"
+  echo "  captioner  - Qwen3-Omni-30B-A3B-Captioner"
+  echo ""
+  echo "Examples:"
+  echo "  $0               # Stop instruct variant"
+  echo "  $0 thinking      # Stop thinking variant"
+  echo "  $0 captioner     # Stop captioner variant"
+  exit 0
+fi
+
+# Load shared configuration with argument
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=config.sh
-source "$SCRIPT_DIR/config.sh"
+source "$SCRIPT_DIR/config.sh" "${1:-}"
 
 echo "=== Stopping Docker Container ==="
 echo "  Container name: $NAME"
+echo "  Model variant:  $MODEL_VARIANT"
 echo "================================="
 
 # Check if container exists

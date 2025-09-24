@@ -1,22 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Load shared configuration
+# Usage information
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: $0 [MODEL_VARIANT]"
+  echo ""
+  echo "MODEL_VARIANT can be:"
+  echo "  instruct   - Qwen3-Omni-30B-A3B-Instruct (default)"
+  echo "  thinking   - Qwen3-Omni-30B-A3B-Thinking"
+  echo "  captioner  - Qwen3-Omni-30B-A3B-Captioner"
+  echo ""
+  echo "Examples:"
+  echo "  $0               # Check instruct variant"
+  echo "  $0 thinking      # Check thinking variant"
+  echo "  $0 captioner     # Check captioner variant"
+  exit 0
+fi
+
+# Load shared configuration with argument
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=config.sh
-source "$SCRIPT_DIR/config.sh"
+source "$SCRIPT_DIR/config.sh" "${1:-}"
 
 echo "=== Docker Container Status ==="
 echo "  Container name: $NAME"
 echo "  Expected image: $IMAGE"
 echo "  Expected port:  $PORT"
+echo "  Model variant:  $MODEL_VARIANT"
+echo "  Model repo:     $MODEL_REPO"
 echo "==============================="
 
 # Check if container exists
 if ! docker ps -a --format '{{.Names}}' | grep -q "^${NAME}$"; then
   echo "❌ Container '$NAME' does not exist."
   echo ""
-  echo "To create and start the container, run: ./start.sh"
+  echo "To create and start the container, run: ./start.sh $MODEL_VARIANT"
   exit 0
 fi
 
@@ -50,7 +68,7 @@ case "$CONTAINER_STATUS" in
     echo ""
     echo "📊 Quick Actions:"
     echo "  View logs:  docker logs -f $NAME"
-    echo "  Stop:       ./stop.sh"
+    echo "  Stop:       ./stop.sh $MODEL_VARIANT"
     ;;
   "exited")
     EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$NAME" 2>/dev/null || echo "unknown")
@@ -62,15 +80,15 @@ case "$CONTAINER_STATUS" in
     echo ""
     echo "📊 Quick Actions:"
     echo "  View logs:  docker logs $NAME"
-    echo "  Restart:    ./start.sh"
-    echo "  Remove:     ./stop.sh"
+    echo "  Restart:    ./start.sh $MODEL_VARIANT"
+    echo "  Remove:     ./stop.sh $MODEL_VARIANT"
     ;;
   "paused")
     echo "  ⏸️  Container is paused"
     echo ""
     echo "📊 Quick Actions:"
     echo "  Unpause:    docker unpause $NAME"
-    echo "  Stop:       ./stop.sh"
+    echo "  Stop:       ./stop.sh $MODEL_VARIANT"
     ;;
   *)
     echo "  ❓ Container status: $CONTAINER_STATUS"

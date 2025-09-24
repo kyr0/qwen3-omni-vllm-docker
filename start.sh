@@ -1,15 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Load shared configuration
+# Usage information
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: $0 [MODEL_VARIANT]"
+  echo ""
+  echo "MODEL_VARIANT can be:"
+  echo "  instruct   - Qwen3-Omni-30B-A3B-Instruct (default)"
+  echo "  thinking   - Qwen3-Omni-30B-A3B-Thinking"
+  echo "  captioner  - Qwen3-Omni-30B-A3B-Captioner"
+  echo ""
+  echo "Examples:"
+  echo "  $0               # Start instruct variant"
+  echo "  $0 thinking      # Start thinking variant"
+  echo "  $0 captioner     # Start captioner variant"
+  exit 0
+fi
+
+# Load shared configuration with argument
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=config.sh
-source "$SCRIPT_DIR/config.sh"
+source "$SCRIPT_DIR/config.sh" "${1:-}"
 
 # -------- Validation --------
 echo "=== Docker Container Configuration ==="
 echo "  Container name:    $NAME"
 echo "  Docker image:      $IMAGE"
+echo "  Model variant:     $MODEL_VARIANT"
+echo "  Model repo:        $MODEL_REPO"
 echo "  Network:           $NET"
 echo "  Network alias:     $ALIAS"
 echo "  Port mapping:      ${PORT}:8901"
@@ -31,7 +49,7 @@ fi
 # Check if Docker image exists
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
   echo "Error: Docker image '$IMAGE' not found."
-  echo "Please build the image first or check the image name."
+  echo "Please build the image first: ./build.sh $MODEL_VARIANT"
   exit 1
 fi
 
@@ -73,6 +91,7 @@ RUN_ARGS=(
   "-p" "${PORT}:8901"
   "--ipc=host"
   "--ulimit" "memlock=-1" "--ulimit" "stack=67108864"
+  "-e" "MODEL_REPO=$MODEL_REPO"
 )
 
 # Add volume mount only if HF_HOME is set
@@ -86,7 +105,8 @@ RUN_ARGS+=("$IMAGE")
 docker "${RUN_ARGS[@]}"
 
 echo "Container '$NAME' started successfully!"
+echo "Model variant: $MODEL_VARIANT ($MODEL_REPO)"
 echo "API endpoint: http://localhost:${PORT}"
 echo ""
 echo "To check logs: docker logs -f $NAME"
-echo "To stop:       docker stop $NAME"
+echo "To stop:       ./stop.sh $MODEL_VARIANT"
