@@ -30,7 +30,7 @@ echo "=============================="
 
 # Build the image with build arguments
 echo "Building Docker image..."
-docker build \
+docker build --dns=8.8.8.8 --progress=plain \
   --build-arg MODEL_VARIANT="$MODEL_VARIANT" \
   --build-arg MODEL_REPO="$MODEL_REPO" \
   -t "$IMAGE" .
