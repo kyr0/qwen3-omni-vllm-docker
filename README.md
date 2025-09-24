@@ -112,7 +112,7 @@ All scripts support help with `-h` or `--help`:
 ./start.sh -h
 ./stop.sh --h
 ./status.sh -h
-./download-model.sh -h
+./download.sh -h
 ```
 
 ## Configuration

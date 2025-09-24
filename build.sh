@@ -38,5 +38,5 @@ docker build --progress=plain \
 echo "Image '$IMAGE' built successfully!"
 echo ""
 echo "Next steps:"
-echo "  1. Download model: ./download-model.sh $MODEL_VARIANT"
+echo "  1. Download model: ./download.sh $MODEL_VARIANT"
 echo "  2. Start container: ./start.sh $MODEL_VARIANT"

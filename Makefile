@@ -40,7 +40,7 @@ build-all:
 	./build.sh captioner
 
 download:
-	./download-model.sh $(MODEL_VARIANT)
+	./download.sh $(MODEL_VARIANT)
 
 start:
 	./start.sh $(MODEL_VARIANT)
