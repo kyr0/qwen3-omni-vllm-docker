@@ -31,6 +31,23 @@ Super-simple docker container setup for running Qwen3-Omni models (Instruct, Thi
    # or specify variant: make download MODEL_VARIANT=thinking
    ```
 
+   Example output:
+
+```bash
+./download.sh instruct
+Setting up Python virtual environment in: .venv...
+=== Hugging Face download configuration ===
+  MODEL_VARIANT:           instruct
+  MODEL_REPO:              Qwen/Qwen3-Omni-30B-A3B-Instruct
+  HF_HOME:                 /var/lib/docker/container_volumes/hf_models
+  TRANSFORMERS_CACHE:      /var/lib/docker/container_volumes/hf_models
+  HUGGINGFACE_HUB_CACHE:   /var/lib/docker/container_volumes/hf_models
+  Effective HF hub cache:  /var/lib/docker/container_volumes/hf_models
+  Target materialization:  HF cache (internal hashed layout)
+===========================================
+Proceed with download? [y/N]
+```
+
 4. **Start the container**:
    ```bash
    make start
@@ -43,6 +60,43 @@ Super-simple docker container setup for running Qwen3-Omni models (Instruct, Thi
    # or specify variant: make status MODEL_VARIANT=thinking
    ```
 
+Example output:
+
+```bash
+./status.sh instruct
+=== Docker Container Status ===
+  Container name: qwen3-omni-30b-a3b-instruct
+  Expected image: qwen3-omni-vllm:instruct
+  Expected port:  8901
+  Model variant:  instruct
+  Model repo:     Qwen/Qwen3-Omni-30B-A3B-Instruct
+===============================
+
+📋 Container Information:
+  Status:     running
+  Image:      qwen3-omni-vllm:instruct
+  Created:    2025-09-24
+  ✅ Container is running
+  Started:    2025-09-24
+  Port map:   8901/tcp -> 0.0.0.0:8901
+8901/tcp -> [::]:8901
+
+🌐 API Access:
+  Endpoint:   http://localhost:8901
+  Health:     http://localhost:8901/health
+
+📊 Quick Actions:
+  View logs:  docker logs -f qwen3-omni-30b-a3b-instruct
+  Stop:       ./stop.sh instruct
+
+🔍 Connectivity Test:
+  ✅ API is responding on port 8901
+
+📈 Resource Usage:
+  CPU:        0.72%     4.002GiB / 503.4GiB
+  Memory:     0.72%     4.002GiB / 503.4GiB
+```
+
 6. **Stop the container**:
    ```bash
    make stop
@@ -54,6 +108,70 @@ Super-simple docker container setup for running Qwen3-Omni models (Instruct, Thi
    make api-test
    # or specify variant: make api-test MODEL_VARIANT=thinking
    ```
+
+Example output:
+
+```bash
+./test-api.sh instruct
+
+=== Testing API for instruct variant ===
+ℹ️  Container: qwen3-omni-30b-a3b-instruct
+ℹ️  API Base: http://localhost:8901
+ℹ️  Model: Qwen/Qwen3-Omni-30B-A3B-Instruct
+
+=== Health Check ===
+✅ API health check passed
+
+=== Model Information ===
+✅ Model info retrieved
+ℹ️  Active model: Qwen/Qwen3-Omni-30B-A3B-Instruct
+
+=== Text Completion Test ===
+✅ Text completion test passed
+ℹ️  Response: Hello! How can I assist you today?
+
+=== Audio Input Test ===
+✅ Audio input test passed
+ℹ️  Audio response: It looks like you've shared a piece of text that appears to be a mix of lyrics and possibly some formatting or code-like elements. Let's break it down and clarify what might be going on:
+
+### 1. **Lyrics Analysis**
+The main part of your message seems to be a set of lyrics, possibly from a song. Here's a cleaned-up version:
+
+```
+I wonder why
+Live a lie
+Walk along, along, oh baby
+One day, night
+The moon
+
+=== Image Input Test ===
+✅ Image input test passed
+ℹ️  Image response: Based on the image provided, here is a detailed description of its content and meaning.
+
+This is a satirical cartoon that uses a "choose your island wisely" metaphor to compare two different approaches to managing application state in modern web development.
+
+### Scene Description
+
+The image is split into two contrasting islands separated by a body of water.
+
+**Left Island (The "State" Island):**
+*   **Environment:** This island is depicted as a dark, stormy, and miserable place. It is under
+
+=== Multimodal Input Test ===
+✅ Multimodal input test passed
+ℹ️  Multimodal response: The audio and image together present a humorous and insightful comparison of two different approaches to state management in modern web development.
+
+**Audio Description:**
+A male speaker is talking conversationally about a person's career trajectory. He notes that this individual "wasn't even that big" when he first started listening to him. The speaker then contrasts the person's solo work, which "didn't do overly well," with his later success, stating, "he did very well when he started writing for other people."
+
+**Image Description:**
+The image is a cartoon titled "CHOOSE YOUR ISLAND WISELY" that visually represents the two contrasting approaches mentioned in the audio.
+
+*   **The Left Island (The "React" Island):** This island
+
+=== Test Summary ===
+✅ All tests passed! 🎉
+```
 
 ## Model Variant Usage
 
