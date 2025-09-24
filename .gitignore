@@ -1,0 +1,13 @@
+.venv
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+.env
+.env.local

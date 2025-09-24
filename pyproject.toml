@@ -1,0 +1,13 @@
+[project]
+name = "qwen3-omni-30b-a3b-instruct-vllm-docker"
+version = "0.1.0"
+description = "Runs Qwen3-Omni-30B-A3B-Instruct model in a Docker container using vLLM."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "huggingface_hub[cli]>=0.24.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
