@@ -10,6 +10,10 @@ NOTE: This has tiny optimizations for H200. Just fork this repo, clone, and modi
 - **thinking**: `Qwen/Qwen3-Omni-30B-A3B-Thinking` 
 - **captioner**: `Qwen/Qwen3-Omni-30B-A3B-Captioner`
 
+## Supports OpenAI-compatible API - works with VSCode Copilot Insiders
+
+<img src="vscode_qwen3-omni.gif" />
+
 ## Quick Start
 
 1. **Make scripts executable**:
