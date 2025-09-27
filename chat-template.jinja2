@@ -1,6 +1,23 @@
 {%- if tools %}
     {{- '<|im_start|>system\n' }}
-    {%- if messages[0].role == 'system' %}{{- messages[0].content + '\n\n' }}{%- endif %}
+    {%- if messages|length > 0 and messages[0].role == 'system' -%}
+        {%- if messages[0].content is string -%}
+            {{- messages[0].content ~ '\n\n' -}}
+        {%- else -%}
+            {%- for part in messages[0].content -%}
+                {%- if part.type == 'image' or 'image' in part or 'image_url' in part -%}
+                    {{- "<|vision_start|><|image_pad|><|vision_end|>\n" -}}
+                {%- elif part.type == 'audio' or 'audio' in part or 'audio_url' in part -%}
+                    {{- "<|audio_start|><|audio_pad|><|audio_end|>\n" -}}
+                {%- elif part.type == 'video' or 'video' in part -%}
+                    {{- "<|vision_start|><|video_pad|><|vision_end|>\n" -}}
+                {%- elif part.type == 'text' and part.text is string -%}
+                    {{- part.text ~ '\n' -}}
+                {%- endif -%}
+            {%- endfor -%}
+            {{- '\n' -}}
+        {%- endif -%}
+    {%- endif -%}
     {{- "# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
     {%- for tool in tools %}
         {{- "\n" }}
@@ -103,4 +120,3 @@
     {{- '<|im_start|>assistant\n' }}
     {%- if enable_thinking is defined and enable_thinking is false %}{{- '<think>\n\n</think>\n\n' }}{%- endif %}
 {%- endif %}
-
