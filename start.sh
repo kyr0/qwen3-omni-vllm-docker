@@ -122,6 +122,8 @@ RUN_ARGS+=(
   "-tp" "1" # tensor parallelism (set to number of GPUs if using multi-GPU)
   "--seed" "42" # for reproducibility, if using sampling
   "--rope-scaling" "{\"type\":\"${ROPE_SCALING_TYPE}\",\"factor\":${ROPE_SCALING_FACTOR}}" # adjust for longer context if needed
+  "--enable-auto-tool-choice" # enable tool use
+  "--tool-call-parser" "auto" # automatically parse tool calls
 )
 
 # Execute docker run
