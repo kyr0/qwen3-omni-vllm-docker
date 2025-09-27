@@ -126,7 +126,7 @@ RUN_ARGS+=(
   "--tool-call-parser" "hermes" # automatically parse tool calls
   # https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Captioner/blob/main/chat_template.json
   # via jq -r '.chat_template' chat_template.json > chat-template.jinja
-  "--chat-template" "./chat-template.jinja2" # original omni chat template extracted from the official repo's chat-template.json
+  "--chat-template" "/opt/vllm/chat-template.jinja2" # original omni chat template extracted from the official repo's chat-template.json
 )
 
 # Execute docker run

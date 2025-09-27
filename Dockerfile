@@ -21,6 +21,8 @@ ENV HF_HOME=/models \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8901/health || exit 1
 
+COPY chat-template.jinja2 /opt/vllm/chat-template.jinja2
+
 EXPOSE 8901
 
 ENTRYPOINT ["vllm", "serve"]
