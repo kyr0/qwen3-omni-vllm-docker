@@ -133,6 +133,8 @@ RUN_ARGS+=(
   # https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Captioner/blob/main/chat_template.json
   # via jq -r '.chat_template' chat_template.json > chat-template.jinja
   "--chat-template" "/opt/vllm/chat-template.jinja2" # original omni chat template extracted from the official repo's chat-template.json
+  "--allowed-local-media-path" "/data" # allow media files to be served from the data volume
+  
 )
 
 # Execute docker run
