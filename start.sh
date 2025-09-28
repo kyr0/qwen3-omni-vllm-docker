@@ -134,7 +134,7 @@ RUN_ARGS+=(
   # via jq -r '.chat_template' chat_template.json > chat-template.jinja
   "--chat-template" "/opt/vllm/chat-template.jinja2" # original omni chat template extracted from the official repo's chat-template.json
   "--allowed-local-media-path" "/data" # allow media files to be served from the data volume
-  
+  "--media-io-kwargs" '{"video":{"num_frames":32,"fps":8}}' # enable video input
 )
 
 # Execute docker run
