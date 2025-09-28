@@ -1,141 +1,122 @@
-{# -------------------------------
-   Helpers
--------------------------------- #}
-{% macro render_parts(parts) -%}
-  {%- set out = namespace(t="") -%}
-  {%- for p in parts -%}
-    {%- if p.type == 'image' or 'image' in p or 'image_url' in p -%}
-      {%- set out.t = out.t ~ "<|vision_start|><|image_pad|><|vision_end|>" -%}
-    {%- elif p.type == 'audio' or 'audio' in p or 'audio_url' in p -%}
-      {%- set out.t = out.t ~ "<|audio_start|><|audio_pad|><|audio_end|>" -%}
-    {%- elif p.type == 'video' or 'video' in p -%}
-      {%- set out.t = out.t ~ "<|vision_start|><|video_pad|><|vision_end|>" -%}
-    {%- elif p.type == 'text' and p.text is string -%}
-      {%- set out.t = out.t ~ p.text -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {{- out.t -}}
-{%- endmacro %}
-
-{% macro render_system_block(msg0) -%}
-  {%- if msg0.role == 'system' -%}
-    {%- if msg0.content is string -%}
-      {{- '<|im_start|>system\n' ~ msg0.content ~ '<|im_end|>\n' -}}
-    {%- else -%}
-      {%- set sys_text = render_parts(msg0.content) -%}
-      {{- '<|im_start|>system\n' ~ sys_text ~ '<|im_end|>\n' -}}
-    {%- endif -%}
-  {%- endif -%}
-{%- endmacro %}
-
-{# -------------------------------
-   Optional Tools Preamble
--------------------------------- #}
 {%- if tools %}
-  {{- '<|im_start|>system\n' }}
-  {%- if messages|length > 0 and messages[0].role == 'system' -%}
-    {%- if messages[0].content is string -%}
-      {{- messages[0].content ~ '\n\n' -}}
-    {%- else -%}
-      {{- render_parts(messages[0].content) ~ '\n' -}}
-    {%- endif -%}
-  {%- endif -%}
-  {{- "# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
-  {%- for tool in tools -%}
-    {{- "\n" -}}{{- tool | tojson -}}
-  {%- endfor -%}
-  {{- "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\n</tool_call><|im_end|>\n" }}
-{%- else %}
-  {%- if messages|length > 0 -%}
-    {{- render_system_block(messages[0]) -}}
-  {%- endif -%}
-{%- endif %}
-
-{# -------------------------------
-   Find last real user query to place <think>
--------------------------------- #}
-{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) -%}
-{%- for message in messages[::-1] -%}
-  {%- set index = (messages|length - 1) - loop.index0 -%}
-  {%- if ns.multi_step_tool
-        and message.role == "user"
-        and message.content is string
-        and not (message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) -%}
-    {%- set ns.multi_step_tool = false -%}
-    {%- set ns.last_query_index = index -%}
-  {%- endif -%}
-{%- endfor -%}
-
-{# -------------------------------
-   Render conversation
--------------------------------- #}
-{%- for message in messages -%}
-  {# Normalize content to a string #}
-  {%- if message.content is string -%}
-    {%- set content = message.content -%}
-  {%- else -%}
-    {%- set content = render_parts(message.content) -%}
-  {%- endif -%}
-
-  {%- if (message.role == "user") or (message.role == "system" and not loop.first) -%}
-    {{- '<|im_start|>' ~ message.role ~ '\n' ~ content ~ '<|im_end|>\n' -}}
-
-  {%- elif message.role == "assistant" -%}
-    {# extract optional reasoning #}
-    {%- set reasoning_content = "" -%}
-    {%- if message.reasoning_content is string -%}
-      {%- set reasoning_content = message.reasoning_content -%}
-    {%- else -%}
-      {%- if '</think>' in content -%}
-        {%- set reasoning_content = content.split('</think>')[0].rstrip('\n').split('<think>')[-1].lstrip('\n') -%}
-        {%- set content = content.split('</think>')[-1].lstrip('\n') -%}
-      {%- endif -%}
-    {%- endif -%}
-
-    {%- if loop.index0 > ns.last_query_index -%}
-      {%- if loop.last or (not loop.last and reasoning_content) -%}
-        {{- '<|im_start|>' ~ message.role ~ '\n<think>\n' ~ reasoning_content.strip('\n') ~ '\n</think>\n\n' ~ content.lstrip('\n') -}}
-      {%- else -%}
-        {{- '<|im_start|>' ~ message.role ~ '\n' ~ content -}}
-      {%- endif -%}
-    {%- else -%}
-      {{- '<|im_start|>' ~ message.role ~ '\n' ~ content -}}
-    {%- endif -%}
-
-    {# tool calls emitted inline after assistant text #}
-    {%- if message.tool_calls -%}
-      {%- for tool_call in message.tool_calls -%}
-        {%- if (loop.first and content) or (not loop.first) -%}{{- '\n' -}}{%- endif -%}
-        {%- set tc = tool_call.function if tool_call.function else tool_call -%}
-        {{- '<tool_call>\n{"name": "' -}}{{- tc.name -}}{{- '", "arguments": ' -}}
-        {%- if tc.arguments is string -%}
-          {{- tc.arguments -}}
+    {{- '<|im_start|>system\n' }}
+    {%- if messages|length > 0 and messages[0].role == 'system' -%}
+        {%- if messages[0].content is string -%}
+            {{- messages[0].content ~ '\n\n' -}}
         {%- else -%}
-          {{- tc.arguments | tojson -}}
+            {%- for part in messages[0].content -%}
+                {%- if part.type == 'image' or 'image' in part or 'image_url' in part -%}
+                    {{- "<|vision_start|><|image_pad|><|vision_end|>\n" -}}
+                {%- elif part.type == 'audio' or 'audio' in part or 'audio_url' in part -%}
+                    {{- "<|audio_start|><|audio_pad|><|audio_end|>\n" -}}
+                {%- elif part.type == 'video' or 'video' in part -%}
+                    {{- "<|vision_start|><|video_pad|><|vision_end|>\n" -}}
+                {%- elif part.type == 'text' and part.text is string -%}
+                    {{- part.text ~ '\n' -}}
+                {%- endif -%}
+            {%- endfor -%}
+            {{- '\n' -}}
         {%- endif -%}
-        {{- '}\n</tool_call>' -}}
-      {%- endfor -%}
     {%- endif -%}
-    {{- '<|im_end|>\n' -}}
-
-  {%- elif message.role == "tool" -%}
-    {# pack consecutive tool messages inside a single user block #}
-    {%- if loop.first or (messages[loop.index0 - 1].role != "tool") -%}
-      {{- '<|im_start|>user' -}}
-    {%- endif -%}
-    {{- '\n<tool_response>\n' -}}{{- content -}}{{- '\n</tool_response>' -}}
-    {%- if loop.last or (messages[loop.index0 + 1].role != "tool") -%}
-      {{- '<|im_end|>\n' -}}
-    {%- endif -%}
-  {%- endif -%}
-{%- endfor -%}
-
-{# -------------------------------
-   Generation prompt
--------------------------------- #}
-{%- if add_generation_prompt -%}
-  {{- '<|im_start|>assistant\n' -}}
-  {%- if enable_thinking is defined and enable_thinking is false -%}
-    {{- '<think>\n\n</think>\n\n' -}}
-  {%- endif -%}
-{%- endif -%}
+    {{- "# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
+    {%- for tool in tools %}
+        {{- "\n" }}
+        {{- tool | tojson }}
+    {%- endfor %}
+    {{- "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call><|im_end|>\n" }}
+{%- else %}
+    {%- if messages[0].role == 'system' %}
+        {%- if messages[0].content is string %}
+            {{- '<|im_start|>system\n' + messages[0].content + '<|im_end|>\n' }}
+        {%- else %}
+            {%- for content in messages[0].content %}
+                {%- if content.type == 'image' or 'image' in content or 'image_url' in content %}
+                    {{- '<|im_start|>system\n' +"<|vision_start|><|image_pad|><|vision_end|>"+ '<|im_end|>\n' }}
+                {%- elif content.type == 'audio' or 'audio' in content or 'audio_url' in content %}
+                    {{- '<|im_start|>system\n' +"<|audio_start|><|audio_pad|><|audio_end|>"+ '<|im_end|>\n' }}
+                {%- elif content.type == 'video' or 'video' in content %}
+                    {{- '<|im_start|>system\n' +"<|vision_start|><|video_pad|><|vision_end|>"+ '<|im_end|>\n' }}
+                {%- elif content.type == 'text' %}
+                    {{- '<|im_start|>system\n' +content.text+ '<|im_end|>\n' }}
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+    {%- endif %}
+{%- endif %}
+{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}
+{%- for message in messages[::-1] %}
+    {%- set index = (messages|length - 1) - loop.index0 %}
+    {%- if ns.multi_step_tool and message.role == "user" and message.content is string and not(message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) %}
+        {%- set ns.multi_step_tool = false %}
+        {%- set ns.last_query_index = index %}
+    {%- endif %}
+{%- endfor %}
+{%- for message in messages %}
+    {%- if message.content is string %}
+        {%- set content = message.content %}
+    {%- else %}
+        {%- set content = namespace(text="") %}
+        {%- for mcontent in message.content %}
+            {%- if mcontent.type == 'image' or 'image' in mcontent or 'image_url' in mcontent %}
+                {%- set content.text = content.text~"<|vision_start|><|image_pad|><|vision_end|>" %}
+            {%- elif mcontent.type == 'audio' or 'audio' in mcontent or 'audio_url' in mcontent %}
+                {%- set content.text = content.text~"<|audio_start|><|audio_pad|><|audio_end|>" %}
+            {%- elif mcontent.type == 'video' or 'video' in mcontent %}
+                {%- set content.text = content.text~"<|vision_start|><|video_pad|><|vision_end|>" %}
+            {%- elif mcontent.type == 'text' %}
+                {%- set content.text = content.text~mcontent.text %}
+            {%- endif %}
+        {%- endfor %}
+        {%- set content = content.text %}
+    {%- endif %}
+    {%- if (message.role == "user") or (message.role == "system" and not loop.first) %}
+        {{- '<|im_start|>' + message.role + '\n' + content + '<|im_end|>' + '\n' }}
+    {%- elif message.role == "assistant" %}
+        {%- set reasoning_content = "" %}
+        {%- if message.reasoning_content is string %}
+            {%- set reasoning_content = message.reasoning_content %}
+        {%- else %}
+            {%- if '</think>' in content %}
+            {%- set reasoning_content = content.split('</think>')[0].rstrip('\n').split('<think>')[-1].lstrip('\n') %}
+            {%- set content = content.split('</think>')[-1].lstrip('\n') %}
+        {%- endif %}
+    {%- endif %}
+    {%- if loop.index0 > ns.last_query_index %}
+        {%- if loop.last or (not loop.last and reasoning_content) %}
+            {{- '<|im_start|>' + message.role + '\n<think>\n' + reasoning_content.strip("\n") + '\n</think>\n\n' + content.lstrip('\n') }}
+        {%- else %}
+            {{- '<|im_start|>' + message.role + '\n' + content }}
+        {%- endif %}
+    {%- else %}
+        {{- '<|im_start|>' + message.role + '\n' + content }}
+    {%- endif %}
+    {%- if message.tool_calls %}
+        {%- for tool_call in message.tool_calls %}
+            {%- if (loop.first and content) or (not loop.first) %}{{- '\n' }}{%- endif %}
+            {%- if tool_call.function %}
+                {%- set tool_call = tool_call.function %}
+            {%- endif %}
+            {{- '<tool_call>\n{"name": "' }}
+            {{- tool_call.name }}
+            {{- '", "arguments": ' }}
+            {%- if tool_call.arguments is string %}
+                {{- tool_call.arguments }}
+            {%- else %}
+                {{- tool_call.arguments | tojson }}
+            {%- endif %}
+            {{- '}\n</tool_call>' }}
+        {%- endfor %}
+    {%- endif %}
+    {{- '<|im_end|>\n' }}
+    {%- elif message.role == "tool" %}
+        {%- if loop.first or (messages[loop.index0 - 1].role != "tool") %}{{- '<|im_start|>user' }}{%- endif %}
+        {{- '\n<tool_response>\n' }}
+        {{- content }}
+        {{- '\n</tool_response>' }}
+        {%- if loop.last or (messages[loop.index0 + 1].role != "tool") %}{{- '<|im_end|>\n' }}{%- endif %}
+    {%- endif %}
+{%- endfor %}
+{%- if add_generation_prompt %}
+    {{- '<|im_start|>assistant\n' }}
+    {%- if enable_thinking is defined and enable_thinking is false %}{{- '<think>\n\n</think>\n\n' }}{%- endif %}
+{%- endif %}
