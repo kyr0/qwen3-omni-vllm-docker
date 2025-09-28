@@ -46,6 +46,9 @@ export MAX_MODEL_LEN=65536  # Max native model context length
 export GPU_MEMORY_UTILIZATION=0.8  # Fraction of GPU memory to utilize (H200 optimized)
 export GPU_DEVICE="all" # Use all available GPUs
 
+# Data volume configuration for multimodal use
+export DATA_DIR="${DATA_DIR:-/var/lib/docker/projects/sample_data}"  # Host directory to mount as /data:ro in container
+
 # RoPE scaling configuration
 export ROPE_SCALING_TYPE="linear"  # or "dynamic" or "ntk"
 export ROPE_SCALING_FACTOR=2.0     # 2x context extension

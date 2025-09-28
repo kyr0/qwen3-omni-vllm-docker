@@ -35,6 +35,7 @@ echo "  Network alias:     $ALIAS"
 echo "  Port mapping:      ${QWEN_PORT}:8901"
 echo "  GPU device:        $GPU_DEVICE"
 echo "  HF_HOME:           ${HF_HOME:-<not set>}"
+echo "  DATA_DIR:          ${DATA_DIR:-<not set>}"
 echo "====================================="
 
 # Check if HF_HOME is set
@@ -102,9 +103,14 @@ RUN_ARGS=(
   "--restart" "unless-stopped"
 )
 
-# Add volume mount only if HF_HOME is set
+# Add volume mounts
 if [[ -n "${HF_HOME:-}" ]]; then
   RUN_ARGS+=("-v" "${HF_HOME}:/models")
+fi
+
+# Add data volume mount only if DATA_DIR is set
+if [[ -n "${DATA_DIR:-}" ]]; then
+  RUN_ARGS+=("-v" "${DATA_DIR}:/data:ro")
 fi
 
 RUN_ARGS+=("$IMAGE")
